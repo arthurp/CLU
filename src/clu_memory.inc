@@ -7,6 +7,8 @@
    See LEGAL for license information and other legalese
  */
 
+#include <unistd.h>
+
 /* Memory functions */
 
 cl_mem
@@ -52,3 +54,30 @@ cluMallocPitch(
 	size *= height;
 	return clCreateBuffer(ctx, flags, size, host_ptr, errcode_ret);
 }
+
+
+static pthread_once_t _pagesize_init_control = PTHREAD_ONCE_INIT;
+static size_t _pagesize = 0; 
+
+static 
+void 
+_initPagesize() {
+  _pagesize = sysconf(_SC_PAGESIZE);
+}
+
+/**
+   Allocate host  memory that is page aligned  (using operating system
+   facilities). This does not use OpenCL at all.
+ */
+void* 
+cluHostMallocPageAligned(size_t size) {
+  void* ptr;
+  (void) pthread_once(&_pagesize_init_control, _initPagesize);
+
+  int err = posix_memalign(&ptr, _pagesize, size);
+  if( !err )
+    return ptr;
+  else
+    return NULL;
+}
+

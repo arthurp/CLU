@@ -295,6 +295,13 @@ cluCreateCommandQueue(
 	cl_command_queue_properties props,
 	cl_int *errcode_ret);
 
+/**
+   Allocate host  memory that is page aligned  (using operating system
+   facilities). This does not use OpenCL at all.
+ */
+void* 
+cluHostMallocPageAligned(size_t size);
+
 /** Create a memory buffer on the current context */
 cl_mem
 cluMalloc(
